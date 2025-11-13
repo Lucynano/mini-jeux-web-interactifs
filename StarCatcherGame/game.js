@@ -1,7 +1,71 @@
+class MenuScene extends Phaser.Scene {
+    constructor() {
+        super('menuScene');
+    }
+
+    preload() {
+        this.load.image('player', 'assets/player.png');
+        this.load.image('star', 'assets/star.png');
+        this.load.image('ufo', 'assets/ufo.png');
+    }
+
+    create() {
+        // Difficulty 
+        this.selectedDifficulty = 'easy';
+
+        // Background
+        this.cameras.main.setBackgroundColor('#1d1160');
+
+        const centerX = this.cameras.main.centerX;
+        const centerY = this.cameras.main.centerY;
+
+        // Texte de difficulté
+        this.difficultyText = this.add.text(centerX, centerY - 20, 'Difficulty: EASY', {
+            font: '28px Arial',
+            fill: '#7CFC00' // vert clair
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true })
+        .on('pointerdown', () => this.changeDifficulty());
+
+        // Texte d’instruction
+        this.add.text(centerX, centerY + 30, '(Click to change, press SPACE to start)', {
+            font: '16px Arial',
+            fill: '#f5f5f5'
+        }).setOrigin(0.5);
+
+        // Espace pour démarrer
+        this.input.keyboard.on('keydown-SPACE', () => {
+            this.scene.start('mainScene', { difficulty: this.selectedDifficulty });
+        });
+    }
+
+    changeDifficulty() {
+        const levels = ['easy', 'medium', 'hard'];
+        const currentIndex = levels.indexOf(this.selectedDifficulty);
+        const nextIndex = (currentIndex + 1) % levels.length;
+        this.selectedDifficulty = levels[nextIndex];
+
+        // Couleurs harmonisées avec fond violet
+        const colorMap = {
+            easy: '#7CFC00', // vert clair
+            medium: '#4FC3F7', // bleu ciel
+            hard: '#FF6EB4' // rose violacé
+        };
+
+        this.difficultyText.setText('Difficulty: ' + this.selectedDifficulty.toUpperCase());
+        this.difficultyText.setFill(colorMap[this.selectedDifficulty]);
+    }
+}
+
 // Create our only scene called mainScene
 class mainScene extends Phaser.Scene {
     constructor() {
         super('mainScene');
+    }
+
+    init(data) {
+        this.difficulty = data.difficulty || 'easy';
     }
     
     hitStar() {
@@ -29,43 +93,28 @@ class mainScene extends Phaser.Scene {
     }
 
     endGame(message, color) {
-        // Stop physics
         this.physics.pause();
-
-        // Stop timer
-        if (this.timerEvent) {
-            this.timerEvent.remove();
-        }
-
-        // Optionally color player
+        if (this.timerEvent) this.timerEvent.remove();
         this.player.setTint(color === '#ff0000' ? 0xff0000 : 0xffffff);
-
-        // Display message
-        const text = this.add.text(0, 0, message, {
+        const text = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, message, {
             font: '30px Arial',
             fill: color
-        });
-        text.setOrigin(0.5);
-        text.setPosition(this.cameras.main.centerX, this.cameras.main.centerY);
-
+        }).setOrigin(0.5);
+        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, 'Press R to restart or M for menu', {
+            font: '16px Arial',
+            fill: '#f5f5f5'
+        }).setOrigin(0.5);
         this.isGameOver = true;
-    }
-
-    preload() {
-        this.load.image('player', 'assets/player.png');
-        this.load.image('star', 'assets/star.png');
-        this.load.image('ufo', 'assets/ufo.png');
-        
+        this.input.keyboard.once('keydown-R', () => this.scene.restart({ difficulty: this.difficulty }));
+        this.input.keyboard.once('keydown-M', () => this.scene.start('menuScene'));
     }
 
     create() {
-        // Difficulty settings
-        const difficulty = 'hard';
         const config = {
-            easy: { ufoSpeed: 150,  ufoCount: 2, timer: 30 },
-            medium: { ufoSpeed: 200, ufoCount: 2, timer: 30 },
-            hard: { ufoSpeed: 250, ufoCount: 3, timer: 30 }
-        }[difficulty];
+            easy: { ufoSpeed: 200,  ufoCount: 2, timer: 30 },
+            medium: { ufoSpeed: 250, ufoCount: 2, timer: 30 },
+            hard: { ufoSpeed: 300, ufoCount: 3, timer: 30 }
+        }[this.difficulty];
 
         // Player
         this.player = this.physics.add.sprite(100, 100, 'player');
@@ -104,7 +153,7 @@ class mainScene extends Phaser.Scene {
         this.score = 0;
         this.scoreText = this.add.text(20, 20, 'Score: 0', {
             font: '20px Arial',
-            fill: '#ffffff'
+            fill: '#f5f5f5'
         });
 
         // Timer
@@ -168,7 +217,6 @@ class mainScene extends Phaser.Scene {
             loop: true
         });
 
-        // Background design
         this.cameras.main.setBackgroundColor('#1d1160');
 
         // Flag to control when game is over
@@ -219,7 +267,7 @@ class mainScene extends Phaser.Scene {
 new Phaser.Game({
     width: 500,
     height: 500,
-    scene: mainScene,
+    scene: [MenuScene, mainScene],
     physics: { 
         default: 'arcade',
         // arcade: {

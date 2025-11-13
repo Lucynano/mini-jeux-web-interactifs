@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Star Catcher Game</title>
     <link rel="icon" type="image/png" href="../favicon.png">
-    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.cdnfonts.com/css/tiny-box" rel="stylesheet">
-    <!-- <style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
+    <script src="game.js"></script>
+    <style>
         :root {
             --bg-color: #301934;
-            --card-bg: #1d1160;
             --accent: #b19cd9;
             --text-light: #f5f5f5;
         }
-
+    
         body {
             display: flex;
             flex-direction: column;
@@ -26,8 +26,8 @@
             color: var(--text-light);
             overflow: hidden;
         }
-
-        h1 {                                                         
+    
+        h1 {
             text-align: center;
             width: 100%;
             padding: 25px 0;
@@ -35,16 +35,33 @@
             letter-spacing: 2px;
             margin-bottom: 40px;
             color: var(--text-light);
-            text-shadow: 0 0 6px 3px rgba(0, 0, 0, 0.5);
-            position: absolute;
+            text-shadow:
+                0 0 10px #cba6f7,
+                0 0 20px #b19cd9,
+                0 0 40px #a16df0;
+            animation: softGlow 2.5s ease-in-out infinite alternate;
+            position: relative;
             top: 20px;
         }
-    </style> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js"></script>
-    <script src="game.js"></script>
+    
+        @keyframes softGlow {
+            0% {
+                text-shadow:
+                    0 0 5px #bfa3f5,
+                    0 0 15px #a16df0,
+                    0 0 25px #7b55c6;
+            }
+            100% {
+                text-shadow:
+                    0 0 20px #e5d4ff,
+                    0 0 40px #c8a7ff,
+                    0 0 60px #b19cd9;
+            }
+        }
+    </style>    
 </head>
 <body>
-    <h1>Star Catcher Game</h1>
+    <h1>⭐ Star Catcher Game ⭐</h1>
     <div id="game"></div>
 </body>
 </html>
